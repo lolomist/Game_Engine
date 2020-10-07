@@ -11,22 +11,23 @@ class InitVulkan
 		~InitVulkan();
 
 	private:
-		void _InitInstance();
-		void _DestroyInstance();
+		void InitInstance();
+		void DestroyInstance();
 
-		void _SetupDebug();
+		void SetupDebug();
 		
-		void _InitDevice();
-		void _DestroyDevice();
+		void InitDevice();
+		void DestroyDevice();
 		
-		void _InitDebug();
-		void _DestroyDebug();
-		void _GetRequiredExtensions();
-		void _GetRequiredLayers();
+		void InitDebug();
+		void DestroyDebug();
+		void GetRequiredExtensions();
+		void GetRequiredLayers();
 
-		VkInstance _instance = nullptr;
-		VkPhysicalDevice _gpu = nullptr;
-		VkDevice _device = nullptr;
+		VkInstance _instance = VK_NULL_HANDLE;
+		VkPhysicalDevice _gpu = VK_NULL_HANDLE;
+		VkDevice _device = VK_NULL_HANDLE;
+		VkQueue _queue = VK_NULL_HANDLE;
 		VkPhysicalDeviceProperties _gpuProperties = {};
 
 		uint32_t _graphicsFamilyIndex = 0;
@@ -35,6 +36,6 @@ class InitVulkan
 		std::vector<const char*> _instanceExtensions;
 		std::vector<const char*> _deviceExtensions;
 
-		VkDebugReportCallbackEXT _debugReport = nullptr;
-		VkDebugReportCallbackCreateInfoEXT debugCallbackCreateInfo = {};
+		VkDebugReportCallbackEXT _debugReport = VK_NULL_HANDLE;
+		VkDebugReportCallbackCreateInfoEXT _debugCallbackCreateInfo = {};
 };

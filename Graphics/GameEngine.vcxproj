@@ -22,12 +22,10 @@
     <ClCompile Include="CheckError.cpp" />
     <ClCompile Include="InitVulkan.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CheckError.h" />
     <ClInclude Include="InitVulkan.h" />
-    <ClInclude Include="Window.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

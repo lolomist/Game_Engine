@@ -8,27 +8,28 @@
 #include <iostream>
 #include <sstream>
 
-#if defined( _WIN32 )
-#include <windows.h>
-#endif
+//#if defined( _WIN32 )
+//#include <windows.h>
+//#endif
 
 InitVulkan::InitVulkan()
 {
-	_SetupDebug();
-	_InitInstance();
-	_InitDebug();
-	_InitDevice();
+	SetupDebug();
+	InitInstance();
+	InitDebug();
+	InitDevice();
 }
 
 InitVulkan::~InitVulkan()
 {
-	_DestroyDevice();
-	_DestroyDebug();
-	_DestroyInstance();
+	DestroyDevice();
+	DestroyDebug();
+	DestroyInstance();
 }
 
-void InitVulkan::_InitInstance()
+void InitVulkan::InitInstance()
 {
+	//Application information
 	VkApplicationInfo appInfo{};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pApplicationName = "3DGameEngine";
@@ -37,6 +38,7 @@ void InitVulkan::_InitInstance()
 	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 	appInfo.apiVersion = VK_API_VERSION_1_0;
 
+	//Information to create instance
 	VkInstanceCreateInfo instance_create_info{};
 	instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instance_create_info.pApplicationInfo = &appInfo;
@@ -44,20 +46,22 @@ void InitVulkan::_InitInstance()
 	instance_create_info.ppEnabledLayerNames = _instanceLayers.data();
 	instance_create_info.enabledExtensionCount = _instanceExtensions.size();
 	instance_create_info.ppEnabledExtensionNames = _instanceExtensions.data();
-	instance_create_info.pNext = &debugCallbackCreateInfo;
+	instance_create_info.pNext = &_debugCallbackCreateInfo;
 
 	CheckError(vkCreateInstance(&instance_create_info, nullptr, &_instance));
 }
 
-void InitVulkan::_DestroyInstance()
+//Cleanup instance
+void InitVulkan::DestroyInstance()
 {
 	vkDestroyInstance(_instance, nullptr);
 	_instance = nullptr;
 }
 
-void InitVulkan::_InitDevice()
+void InitVulkan::InitDevice()
 {
 	{
+		//Get count of physical device
 		uint32_t gpu_count = 0;
 		vkEnumeratePhysicalDevices(_instance, &gpu_count, nullptr);
 		std::vector<VkPhysicalDevice> gpu_list(gpu_count);
@@ -66,11 +70,13 @@ void InitVulkan::_InitDevice()
 		vkGetPhysicalDeviceProperties(_gpu, &_gpuProperties);
 	}
 	{
+		//Get count of device queue families
 		uint32_t family_count = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(_gpu, &family_count, nullptr);
 		std::vector<VkQueueFamilyProperties> family_property_list(family_count);
 		vkGetPhysicalDeviceQueueFamilyProperties(_gpu, &family_count, family_property_list.data());
 
+		//Check if queue family is supporting graphics
 		bool found = false;
 		for (uint32_t i = 0; i < family_count; ++i) {
 			if (family_property_list[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
@@ -84,6 +90,7 @@ void InitVulkan::_InitDevice()
 		}
 	}
 	{
+		//print instance layers name
 		uint32_t layer_count = 0;
 		vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
 		std::vector<VkLayerProperties> layer_property_list(layer_count);
@@ -95,6 +102,7 @@ void InitVulkan::_InitDevice()
 		std::cout << std::endl;
 	}
 	{
+		//print device layers name
 		uint32_t layer_count = 0;
 		vkEnumerateDeviceLayerProperties(_gpu, &layer_count, nullptr);
 		std::vector<VkLayerProperties> layer_property_list(layer_count);
@@ -106,6 +114,7 @@ void InitVulkan::_InitDevice()
 		std::cout << std::endl;
 	}
 
+	//Specify the queues to create
 	float queue_priorities[]{ 1.0f };
 	VkDeviceQueueCreateInfo device_queue_create_info{};
 	device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -113,17 +122,25 @@ void InitVulkan::_InitDevice()
 	device_queue_create_info.queueCount = 1;
 	device_queue_create_info.pQueuePriorities = queue_priorities;
 
+	//Create logical device
+	VkPhysicalDeviceFeatures deviceFeatures{};
 	VkDeviceCreateInfo device_create_info{};
 	device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	device_create_info.queueCreateInfoCount = 1;
+	device_create_info.pEnabledFeatures = &deviceFeatures;
 	device_create_info.pQueueCreateInfos = &device_queue_create_info;
+	//device_create_info.enabledLayerCount = _instanceLayers.size();				// it looks like it's deprecated, need more information about it
+	//device_create_info.ppEnabledLayerNames = _instanceLayers.data();				// it looks like it's deprecated, need more information about it
 	device_create_info.enabledExtensionCount = _deviceExtensions.size();
 	device_create_info.ppEnabledExtensionNames = _deviceExtensions.data();
 
 	CheckError(vkCreateDevice(_gpu, &device_create_info, nullptr, &_device));
+
+	vkGetDeviceQueue(_device, _graphicsFamilyIndex, 0, &_queue);
 }
 
-void InitVulkan::_DestroyDevice()
+//Cleanup device
+void InitVulkan::DestroyDevice()
 {
 	vkDestroyDevice(_device, nullptr);
 	_device = nullptr;
@@ -161,30 +178,33 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugReportFlagsEXT flags, 
 	return false;
 }
 
-void InitVulkan::_SetupDebug()
+void InitVulkan::SetupDebug()
 {
-	debugCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT;
-	debugCallbackCreateInfo.pfnCallback = VulkanDebugCallback;
-	debugCallbackCreateInfo.flags = VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT | 0;
+	_debugCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT;
+	_debugCallbackCreateInfo.pfnCallback = VulkanDebugCallback;
+	_debugCallbackCreateInfo.flags = VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT | 0;
 
-	_GetRequiredExtensions();
-	_GetRequiredLayers();
+	GetRequiredExtensions();
+	GetRequiredLayers();
 }
 
-void InitVulkan::_GetRequiredExtensions() {
+//Add required extensions
+void InitVulkan::GetRequiredExtensions() {
 	_instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	_instanceExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 }
 
-void InitVulkan::_GetRequiredLayers() {
-	_instanceLayers.push_back("VK_LAYER_LUNARG_standard_validation");
+//Add required Layers
+void InitVulkan::GetRequiredLayers() {
+	//_instanceLayers.push_back("VK_LAYER_LUNARG_standard_validation");
 	_instanceLayers.push_back("VK_LAYER_KHRONOS_validation");
 }
 
 PFN_vkCreateDebugReportCallbackEXT fvkCreateDebugReportCallbackEXT = nullptr;
 PFN_vkDestroyDebugReportCallbackEXT fvkDestroyDebugReportCallbackEXT = nullptr;
 
-void InitVulkan::_InitDebug()
+//Initialisation of debug report
+void InitVulkan::InitDebug()
 {
 	fvkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(_instance, "vkCreateDebugReportCallbackEXT");
 	fvkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugReportCallbackEXT");
@@ -193,11 +213,12 @@ void InitVulkan::_InitDebug()
 		std::exit(-1);
 	}
 
-	fvkCreateDebugReportCallbackEXT(_instance, &debugCallbackCreateInfo, nullptr, &_debugReport);
+	fvkCreateDebugReportCallbackEXT(_instance, &_debugCallbackCreateInfo, nullptr, &_debugReport);
 }
 
-void InitVulkan::_DestroyDebug()
+//Cleanup debug report
+void InitVulkan::DestroyDebug()
 {
 	fvkDestroyDebugReportCallbackEXT(_instance, _debugReport, nullptr);
-	_debugReport = nullptr;
+	_debugReport = VK_NULL_HANDLE;
 }
