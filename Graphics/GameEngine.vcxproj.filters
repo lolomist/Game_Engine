@@ -24,12 +24,18 @@
     <ClCompile Include="InitVulkan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CommandBuffers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CheckError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InitVulkan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandBuffers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

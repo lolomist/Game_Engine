@@ -6,6 +6,7 @@
 #include <cstdlib>
 
 #include "InitVulkan.h"
+#include "CommandBuffers.h"
 
 class HelloTriangleApplication {
 public:
@@ -18,6 +19,11 @@ public:
 private:
     void initVulkan() {
         InitVulkan i;
+
+        auto device = i._device;
+        auto queue = i._queue;
+
+        CommandBuffers commandBuffers(i, device, queue);
     }
 
     void mainLoop() {

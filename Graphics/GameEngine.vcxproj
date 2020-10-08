@@ -20,11 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CheckError.cpp" />
+    <ClCompile Include="CommandBuffers.cpp" />
     <ClCompile Include="InitVulkan.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CheckError.h" />
+    <ClInclude Include="CommandBuffers.h" />
     <ClInclude Include="InitVulkan.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
