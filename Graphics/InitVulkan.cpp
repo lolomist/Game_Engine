@@ -1,3 +1,5 @@
+#include "BUILD_OPTIONS.h"
+
 #include "InitVulkan.h"
 #include "CheckError.h"
 
@@ -14,16 +16,22 @@
 
 InitVulkan::InitVulkan()
 {
-	SetupDebug();
+	//Call debug function only when it's enable
+	if (BUILD_ENABLE_VULKAN_DEBUG)
+		SetupDebug();
 	InitInstance();
-	InitDebug();
+	//Call debug function only when it's enable
+	if (BUILD_ENABLE_VULKAN_DEBUG)
+		InitDebug();
 	InitDevice();
 }
 
 InitVulkan::~InitVulkan()
 {
 	DestroyDevice();
-	DestroyDebug();
+	//Call debug function only when it's enable
+	if (BUILD_ENABLE_VULKAN_DEBUG)
+		DestroyDebug();
 	DestroyInstance();
 }
 
@@ -42,9 +50,9 @@ void InitVulkan::InitInstance()
 	VkInstanceCreateInfo instance_create_info{};
 	instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instance_create_info.pApplicationInfo = &appInfo;
-	instance_create_info.enabledLayerCount = _instanceLayers.size();
+	instance_create_info.enabledLayerCount = static_cast<uint32_t>(_instanceLayers.size());
 	instance_create_info.ppEnabledLayerNames = _instanceLayers.data();
-	instance_create_info.enabledExtensionCount = _instanceExtensions.size();
+	instance_create_info.enabledExtensionCount = static_cast<uint32_t>(_instanceExtensions.size());
 	instance_create_info.ppEnabledExtensionNames = _instanceExtensions.data();
 	instance_create_info.pNext = &_debugCallbackCreateInfo;
 
@@ -131,7 +139,7 @@ void InitVulkan::InitDevice()
 	device_create_info.pQueueCreateInfos = &device_queue_create_info;
 	//device_create_info.enabledLayerCount = _instanceLayers.size();				// it looks like it's deprecated, need more information about it
 	//device_create_info.ppEnabledLayerNames = _instanceLayers.data();				// it looks like it's deprecated, need more information about it
-	device_create_info.enabledExtensionCount = _deviceExtensions.size();
+	device_create_info.enabledExtensionCount = static_cast<uint32_t>(_deviceExtensions.size());
 	device_create_info.ppEnabledExtensionNames = _deviceExtensions.data();
 
 	CheckError(vkCreateDevice(_gpu, &device_create_info, nullptr, &_device));

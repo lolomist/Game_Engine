@@ -6,37 +6,37 @@
 
 class InitVulkan
 {
-	public:
-		InitVulkan();
-		~InitVulkan();
+public:
+	InitVulkan();
+	~InitVulkan();
 
-		VkDevice _device = VK_NULL_HANDLE;
-		VkQueue _queue = VK_NULL_HANDLE;
+	VkDevice _device = VK_NULL_HANDLE;
+	VkQueue _queue = VK_NULL_HANDLE;
 
-		uint32_t _graphicsFamilyIndex = 0;
+	uint32_t _graphicsFamilyIndex = 0;
 
-	private:
-		void InitInstance();
-		void DestroyInstance();
+private:
+	void InitInstance();
+	void DestroyInstance();
 
-		void SetupDebug();
+	void SetupDebug();
 		
-		void InitDevice();
-		void DestroyDevice();
+	void InitDevice();
+	void DestroyDevice();
 		
-		void InitDebug();
-		void DestroyDebug();
-		void GetRequiredExtensions();
-		void GetRequiredLayers();
+	void InitDebug();
+	void DestroyDebug();
+	void GetRequiredExtensions();
+	void GetRequiredLayers();
 
-		VkInstance _instance = VK_NULL_HANDLE;
-		VkPhysicalDevice _gpu = VK_NULL_HANDLE;
-		VkPhysicalDeviceProperties _gpuProperties = {};
+	VkInstance _instance = VK_NULL_HANDLE;
+	VkPhysicalDevice _gpu = VK_NULL_HANDLE;
+	VkPhysicalDeviceProperties _gpuProperties = {};
 
-		std::vector<const char*> _instanceLayers;
-		std::vector<const char*> _instanceExtensions;
-		std::vector<const char*> _deviceExtensions;
+	std::vector<const char*> _instanceLayers;
+	std::vector<const char*> _instanceExtensions;
+	std::vector<const char*> _deviceExtensions;
 
-		VkDebugReportCallbackEXT _debugReport = VK_NULL_HANDLE;
-		VkDebugReportCallbackCreateInfoEXT _debugCallbackCreateInfo = {};
+	VkDebugReportCallbackEXT _debugReport = VK_NULL_HANDLE;
+	VkDebugReportCallbackCreateInfoEXT _debugCallbackCreateInfo = {};
 };
