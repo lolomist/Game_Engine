@@ -1,4 +1,8 @@
+#include "BUILD_OPTIONS.h"
+
 #include "CheckError.h"
+
+#if BUILD_ENABLE_VULKAN_RUNTIME_DEBUG
 
 void CheckError(VkResult result)
 {
@@ -61,3 +65,9 @@ void CheckError(VkResult result)
 		assert(0 && "Vulkan runtime error.");
 	}
 }
+
+#else
+
+void ErrorCheck(VkResult result) {};
+
+#endif // BUILD_ENABLE_VULKAN_RUNTIME_DEBUG
