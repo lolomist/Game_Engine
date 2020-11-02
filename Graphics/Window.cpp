@@ -1,11 +1,23 @@
 #include "Window.h"
 
-Window::Window()
+Window::Window(int width, int height, std::string title)
 {
-
+	_width = width;
+	_height = height;
+	_title = title;
 }
 
-Window::~Window()
-{
-
-}
+//int Window::getWidth()
+//{
+//	return _width;
+//}
+//
+//int Window::getHeight()
+//{
+//	return _height;
+//}
+//
+//std::string Window::getTitle()
+//{
+//	return _title;
+//}
