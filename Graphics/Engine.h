@@ -1,5 +1,5 @@
 #pragma once
-#define STB_IMAGE_IMPLEMENTATION
+//#define STB_IMAGE_IMPLEMENTATION
 #define TINYOBJLOADER_IMPLEMENTATION
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -10,6 +10,7 @@
 #include "SceneObject.h"
 #include "Camera.h"
 #include "UBO.h"
+#include "Window.h"
 
 #include <optional>
 #include <iostream>
@@ -25,7 +26,6 @@
 #include <glm/glm.hpp>
 #include <array>
 #include <chrono>
-#include "Window.h"
 
 const uint32_t WIDTH = 1280;
 const uint32_t HEIGHT = 720;
@@ -54,15 +54,85 @@ constexpr bool enableValidationLayers = true;
 
 class Engine {
 public:
-    void run() {
-        initWindow();
+   /* Engine(int windowWidth, int windowHeight, std::string title) {
+        initWindow(windowWidth, windowHeight, title);
         initVulkan();
-        mainLoop();
+    }*/
+    Engine(Window *window) {
+        this->window = window;
+        initVulkan();
+    }
+    ~Engine() {
+        vkDeviceWaitIdle(device);
+        cleanup();
+    }
+
+    SceneObject *createObject(std::string objPath, std::string texturePath, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
+        Utils* utils = new Utils(device, physicalDevice, commandPool, graphicsQueue);
+
+        SceneObject *obj = new SceneObject(objPath, texturePath, position, rotation, scale, utils);
+        sceneObjects.push_back(obj);
+        return obj;
+    }
+
+    SceneObject* createObject(std::string objPath, std::string texturePath, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Camera camera) {
+        this->camera = camera;
+        Utils* utils = new Utils(device, physicalDevice, commandPool, graphicsQueue);
+
+        SceneObject* obj = new SceneObject(objPath, texturePath, position, rotation, scale, &this->camera, utils);
+        sceneObjects.push_back(obj);
+        return obj;
+    }
+
+    Camera createCamera(glm::vec3 position, glm::vec3 direction) {
+        camera = Camera(position, direction);
+        return camera;
+    }
+
+    void draw(SceneObject *obj) {
+        vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+        uint32_t imageIndex = getNextImage();
+        updateUniformBuffer(obj, imageIndex);
+        renderImage(imageIndex);
+    }
+
+    void drawObjects() {
+        vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+        uint32_t imageIndex = getNextImage();
+
+        for (size_t objIndex = 0; objIndex < sceneObjects.size(); objIndex++) {
+            updateUniformBuffer(sceneObjects[objIndex], imageIndex);
+        }
+
+        renderImage(imageIndex);
+    }
+
+
+    bool isWindowOpen() {
+        if (isObjectsInit == false) {
+            initObjects();
+            isObjectsInit = true;
+        }
+
+        return window->isWindowOpen();
+    }
+
+   /* GLFWwindow* getWindow() {
+        return glfwWindow;
+    }*/
+
+    void run() {
+        //initWindow();
+        //initVulkan();
+        //mainLoop();
         cleanup();
     }
 
 private:
-    GLFWwindow* glfwWindow;
+    bool isObjectsInit = false;
+
+    //GLFWwindow* glfwWindow;
+    Window* window;
     VkInstance instance;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice device;
@@ -101,7 +171,8 @@ private:
     //Camera 
     //glm::vec3 camPosition = glm::vec3(0.f, 0.f, 4.0f);
     //Camera camera = Camera(glm::vec3(0.f, 0.f, 5.0f), glm::vec3(0.f, 0.f, -90.f), glm::vec3(0.f, 1.f, 0.f));
-    Camera camera = Camera(glm::vec3(0.f, 3.5f, -6.5f), glm::vec3(-25.f, 0.f, 90.f));
+    //Camera camera = Camera(glm::vec3(0.f, 3.5f, -6.5f), glm::vec3(-25.f, 0.f, 90.f));
+    Camera camera;
 
     //Delta time
     float dt = 0.f;
@@ -119,7 +190,7 @@ private:
 
     size_t currentFrame = 0;
 
-    bool framebufferResized = false;
+    //bool framebufferResized = false;
 
     struct QueueFamilyIndices {
         std::optional<uint32_t> graphicsFamily;
@@ -130,29 +201,63 @@ private:
         }
     };
 
-
     struct SwapChainSupportDetails {
         VkSurfaceCapabilitiesKHR capabilities;
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
     };
 
-    void initWindow() {
-        glfwInit();
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    //void initWindow(int windowWidth, int windowHeight, std::string title) {
+    //    glfwInit();
+    //    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    //    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-        glfwWindow = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan Engine", nullptr, nullptr);
-        glfwSetWindowUserPointer(glfwWindow, this);
-        glfwSetFramebufferSizeCallback(glfwWindow, framebufferResizeCallback);
-        glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
+    //    glfwWindow = glfwCreateWindow(windowWidth, windowHeight, title.c_str(), nullptr, nullptr);
+    //    glfwSetWindowUserPointer(glfwWindow, this);
+    //    glfwSetFramebufferSizeCallback(glfwWindow, framebufferResizeCallback);
+    //    //glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //}
 
-    static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+    /*static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
         std::cout << "Resize callback !" << std::endl;
         auto app = reinterpret_cast<Engine*>(glfwGetWindowUserPointer(window));
         app->framebufferResized = true;
-    }
+    }*/
+
+    //void initVulkan() {
+    //    createInstance();
+    //    createSurface();
+    //    pickPhysicalDevice();
+    //    createLogicalDevice();
+    //    createSwapChain();
+    //    createImageViews();
+    //    createRenderPass();
+    //    createDescriptorSetLayout();
+    //    createGraphicsPipeline();
+    //    createCommandPool();
+    //    createDepthResources();
+    //    createFramebuffers();
+    //    Utils* utils = new Utils(device, physicalDevice, commandPool, graphicsQueue);
+    //    sceneObjects.push_back(new SceneObject("models/viking_room.obj", "textures/viking_room.png", glm::vec3(15.5f, 0.0f, 0.5f), glm::vec3(-90.0f, 0.f, 180.f), glm::vec3(10.f), utils));
+    //    //sceneObjects.push_back(new SceneObject("models/viking_room.obj", "textures/viking_room.png", glm::vec3(4.0f, 0.0f, -1.5f), glm::vec3(0.0f), glm::vec3(1.f), false, utils));
+    //    sceneObjects.push_back(new SceneObject("models/book.obj", "textures/book.png", glm::vec3(-2.5f, 0.0f, -0.5f), glm::vec3(0.0f), glm::vec3(1.f), utils));
+    //    sceneObjects.push_back(new SceneObject("models/box.obj", "textures/box.jpg", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.f), utils));
+    //    sceneObjects.push_back(new SceneObject("models/spaceship.obj", "textures/spaceship1.jpg", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f), glm::vec3(0.5f), &camera, utils));
+    //    std::cout << "Total Object " << sceneObjects.size() << std::endl;
+    //    createDescriptorPool(sceneObjects.size());
+
+
+    //    for (size_t objIndex = 0; objIndex < sceneObjects.size(); objIndex++) {
+    //      /*  if (sceneObjects[objIndex]->hasCamera()) {
+    //            camera = sceneObjects[objIndex]->getCamera();
+    //        }*/
+    //        sceneObjects[objIndex]->createUniformBuffer(swapChainImages.size());
+    //        sceneObjects[objIndex]->createDescriptorSets(swapChainImages.size(), descriptorSetLayout, descriptorPool);
+    //    }
+
+    //    createDrawCommandBuffers();
+    //    createSyncObjects();
+    //}
 
     void initVulkan() {
         createInstance();
@@ -167,37 +272,33 @@ private:
         createCommandPool();
         createDepthResources();
         createFramebuffers();
+    }
 
-        Utils* utils = new Utils(device, physicalDevice, commandPool, graphicsQueue);
-        sceneObjects.push_back(new SceneObject("models/viking_room.obj", "textures/viking_room.png", glm::vec3(15.5f, 0.0f, 0.5f), glm::vec3(-90.0f, 0.f, 180.f), glm::vec3(10.f), utils));
-        //sceneObjects.push_back(new SceneObject("models/viking_room.obj", "textures/viking_room.png", glm::vec3(4.0f, 0.0f, -1.5f), glm::vec3(0.0f), glm::vec3(1.f), false, utils));
-        sceneObjects.push_back(new SceneObject("models/book.obj", "textures/book.png", glm::vec3(-2.5f, 0.0f, -0.5f), glm::vec3(0.0f), glm::vec3(1.f), utils));
-        sceneObjects.push_back(new SceneObject("models/box.obj", "textures/box.jpg", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.f), utils));
-        sceneObjects.push_back(new SceneObject("models/spaceship.obj", "textures/spaceship1.jpg", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f), glm::vec3(0.5f), &camera, utils));
-        std::cout << "Total Object " << sceneObjects.size() << std::endl;
-        createDescriptorPool(sceneObjects.size());
+    void initObjects() {
+        std::cout << "InitObjects : Total Object " << sceneObjects.size() << std::endl;
+        
+        if (sceneObjects.size() > 0) {
+            createDescriptorPool(sceneObjects.size());
 
+            for (size_t objIndex = 0; objIndex < sceneObjects.size(); objIndex++) {
+                sceneObjects[objIndex]->createUniformBuffer(swapChainImages.size());
+                sceneObjects[objIndex]->createDescriptorSets(swapChainImages.size(), descriptorSetLayout, descriptorPool);
+            }
 
-        for (size_t objIndex = 0; objIndex < sceneObjects.size(); objIndex++) {
-          /*  if (sceneObjects[objIndex]->hasCamera()) {
-                camera = sceneObjects[objIndex]->getCamera();
-            }*/
-            sceneObjects[objIndex]->createUniformBuffer(swapChainImages.size());
-            sceneObjects[objIndex]->createDescriptorSets(swapChainImages.size(), descriptorSetLayout, descriptorPool);
+           createDrawCommandBuffers();
+           createSyncObjects();
         }
-
-        createDrawCommandBuffers();
-        createSyncObjects();
     }
 
     void recreateSwapChain() {
         std::cout << "Recreate Swap Chain" << std::endl;
         int width = 0, height = 0;
-        glfwGetFramebufferSize(glfwWindow, &width, &height);
+        window->getFrameBufferSize(&width, &height);
+        //glfwGetFramebufferSize(glfwWindow, &width, &height);
 
         // la taille de la fenêtre est à 0 lorsqu'on minimimise la fenetre, on mets en pause la fenêtre dans ce cas
         while (width == 0 || height == 0) {
-            glfwGetFramebufferSize(glfwWindow, &width, &height);
+            window->getFrameBufferSize(&width, &height);
             glfwWaitEvents();
         }
 
@@ -222,27 +323,27 @@ private:
         createDrawCommandBuffers();
     }
 
-    void mainLoop() {
+    /*void mainLoop() {
         while (!glfwWindowShouldClose(glfwWindow)) {
             update();
             drawFrame();
         }
         vkDeviceWaitIdle(device);
-    }
+    }*/
 
     void update() {
         updateTime();
-        updateInput();
+        //updateInput();
 
         //sceneObjects[0]->rotate(glm::vec3(50.0f, 0.f, 0.f), dt);
     }
 
-    void updateInput() {
+   /* void updateInput() {
         glfwPollEvents();
         updateMouseInput();
         updateKeyboardInput(glfwWindow, sceneObjects[3]);
         camera.updateInput(dt, mouseOffsetX, mouseOffsetY);
-    }
+    }*/
 
     void updateTime() {
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -252,24 +353,24 @@ private:
         //std::cout << "DELT " << dt << std::endl;
     }
 
-    void updateMouseInput() {
-        glfwGetCursorPos(this->glfwWindow, &this->mouseX, &this->mouseY);
+    //void updateMouseInput() {
+    //    glfwGetCursorPos(this->glfwWindow, &this->mouseX, &this->mouseY);
 
-        if (this->firstMouse)
-        {
-            this->lastMouseX = this->mouseX;
-            this->lastMouseY = this->mouseY;
-            this->firstMouse = false;
-        }
+    //    if (this->firstMouse)
+    //    {
+    //        this->lastMouseX = this->mouseX;
+    //        this->lastMouseY = this->mouseY;
+    //        this->firstMouse = false;
+    //    }
 
-        //Calc offset
-        this->mouseOffsetX = this->mouseX - this->lastMouseX;
-        this->mouseOffsetY = this->lastMouseY - this->mouseY;
+    //    //Calc offset
+    //    this->mouseOffsetX = this->mouseX - this->lastMouseX;
+    //    this->mouseOffsetY = this->lastMouseY - this->mouseY;
 
-        //Set last X and Y
-        this->lastMouseX = this->mouseX;
-        this->lastMouseY = this->mouseY;
-    }
+    //    //Set last X and Y
+    //    this->lastMouseX = this->mouseX;
+    //    this->lastMouseY = this->mouseY;
+    //}
 
     void updateKeyboardInput(GLFWwindow* window, SceneObject* obj) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -361,7 +462,7 @@ private:
         vkDestroySurfaceKHR(instance, surface, nullptr);
         vkDestroyInstance(instance, nullptr);
 
-        glfwDestroyWindow(glfwWindow);
+        window->destroyWindow();
         glfwTerminate();
     }
 
@@ -461,8 +562,8 @@ private:
 
         VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
-            framebufferResized = false;
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window->getFrameBufferResized()) {
+            window->setFrameBufferResized(false);
             recreateSwapChain();
         }
         else if (result != VK_SUCCESS) {
@@ -575,9 +676,7 @@ private:
     }
 
     void createSurface() {
-        if (glfwCreateWindowSurface(instance, glfwWindow, nullptr, &surface) != VK_SUCCESS) {
-            throw std::runtime_error("échec de la création de la window surface!");
-        }
+        surface = window->createWindowSurface(instance);
     }
 
     void pickPhysicalDevice() {
@@ -795,7 +894,7 @@ private:
         }
         else {
             int width, height;
-            glfwGetFramebufferSize(glfwWindow, &width, &height);
+            window->getFrameBufferSize(&width, &height);
             VkExtent2D actualExtent = {
                 static_cast<uint32_t>(width),
                 static_cast<uint32_t>(height)
@@ -1489,16 +1588,27 @@ private:
     }
 };
 
-int main() {
-    Engine app;
+//int main() {
+//    Engine app(800,600, "test");
+//
+//    try {
+//        app.run();
+//    }
+//    catch (const std::exception& e) {
+//        std::cerr << e.what() << std::endl;
+//        return EXIT_FAILURE;
+//    }
+//
+//    return EXIT_SUCCESS;
+//};
 
-    try {
-        app.run();
-    }
-    catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-};
+//int main() {
+//    Engine engine(800, 600, "Engine window");
+//
+//    GLFWwindow *window = engine.getWindow();
+//
+//    while (!glfwWindowShouldClose(window)) {
+//        glfwPollEvents();
+//    }
+//    return 0;
+//};

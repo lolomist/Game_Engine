@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Utils.h"
 
 #include <string>
@@ -7,7 +8,6 @@
 #include <iostream>
 #include <vulkan/vulkan.h>
 
-//#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 class TextureImage

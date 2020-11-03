@@ -1,14 +1,19 @@
 #pragma once
 #include <string>
+#include <vulkan/vulkan.h>
 
 class Window
 {
 public:
-	Window(int width, int height, std::string title);
-
-	virtual int getWidth() = 0;
-	virtual int getHeight() = 0;
-	virtual std::string getTitle() = 0;
+	virtual bool getFrameBufferResized() { return false; };
+	virtual void getFrameBufferSize(int* width, int* height) = 0;
+	virtual void setFrameBufferResized(bool isResize) { return ; }
+	virtual bool isWindowOpen() = 0;
+	virtual void pollEvents() = 0;
+	virtual bool isKeyPressed(int key) = 0;
+	virtual VkSurfaceKHR createWindowSurface(VkInstance instance) = 0;
+	virtual void destroyWindow() = 0;
+	virtual void close() = 0;
 
 private:
 	int _width;
