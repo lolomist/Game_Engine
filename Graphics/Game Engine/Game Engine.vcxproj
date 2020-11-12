@@ -159,6 +159,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\physique (Valentin)\collision.cpp" />
+    <ClCompile Include="..\..\physique (Valentin)\test.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CreateObject.cpp" />
     <ClCompile Include="Cube.cpp" />
@@ -168,8 +170,10 @@
     <ClCompile Include="Lights\Light.cpp" />
     <ClCompile Include="Lights\PointLight.cpp" />
     <ClCompile Include="Lights\SpotLight.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="lightTest.cpp" />
+    <ClCompile Include="game.cpp" />
     <ClCompile Include="CustomObject.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="ObjectsAllocator.cpp" />
     <ClCompile Include="Shaders_class\ColorShader.cpp" />
     <ClCompile Include="Shaders_class\LightSourceShader.cpp" />
@@ -179,6 +183,7 @@
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\physique (Valentin)\physics.hpp" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CreateObject.h" />
     <ClInclude Include="Cube.h" />
@@ -194,6 +199,7 @@
     <ClInclude Include="ObjectsAllocator.h" />
     <ClInclude Include="OBJLoader.h" />
     <ClInclude Include="CustomObject.h" />
+    <ClInclude Include="physics_directionalMovement.h" />
     <ClInclude Include="Shaders_class\ColorShader.h" />
     <ClInclude Include="Shaders_class\LightSourceShader.h" />
     <ClInclude Include="Shaders_class\Shader.h" />

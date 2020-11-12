@@ -43,6 +43,8 @@ struct Material {
     vec3 diffuse;
     vec3 specular;
     float shininess;
+    vec3 emissionColor;
+    float emissionRate;
 };
 
 layout(set = 0, binding = 0) uniform UniformBufferObject {
@@ -84,7 +86,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 textureMateria
     vec3 ambient  = light.ambient  * textureMaterial;
     vec3 diffuse  = light.diffuse  * (diff * textureMaterial);
     vec3 specular = light.specular * (spec * specularMaterial);
-    return (ambient + diffuse + specular);
+    return (ambient + diffuse + specular + emission);
 }  
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 textureMaterial, vec3 specularMaterial, vec3 emission)
@@ -134,10 +136,19 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec
     return (ambient + diffuse + specular + emission);
 }
 
-vec3 calculate_emission(vec3 specular, vec3 emission)
+vec3 calculate_emission(vec3 specular, vec3 emission, bool showSpecular)
 {
     vec3 show = step(vec3(1.0), vec3(1.0) - specular);
-    return (emission * show) * mix( vec3( 1.0, 1.0, 0.0 ), vec3(texture(texEmission, FragTexCoord)).rgb, sin(ubo.time) * 1.0 );
+    //return (emission * show) * mix( vec3(ubo.material.emissionColor), vec3(texture(texEmission, FragTexCoord)).rgb, ubo.material.emissionRate);
+    if (showSpecular == true)
+    {
+        return (mix( vec3(ubo.material.emissionColor), emission * show, ubo.material.emissionRate) * show);
+    }
+
+    if (showSpecular == false)
+    {
+        return emission * (mix( vec3(ubo.material.emissionColor), emission, ubo.material.emissionRate));
+    }
 }
 
 void main()
@@ -159,15 +170,16 @@ void main()
     //Emission Texture loaded without specular, texSpecular = emission Texture
     else if (ubo.hasSpecularTexture == 2) {
         specular = ubo.material.specular;
-        emission = vec3(texture(texSpecular, FragTexCoord));
+        //emission = vec3(texture(texSpecular, FragTexCoord));
+        emission = calculate_emission(specular, vec3(texture(texSpecular, FragTexCoord)).rgb, false);
     }
 
       //Emission Texture with specular
     else if (ubo.hasSpecularTexture == 3) {
         specular = vec3(texture(texSpecular, FragTexCoord));
-        emission = calculate_emission(specular, vec3(texture(texEmission, FragTexCoord)).rgb);
+        emission = calculate_emission(specular, vec3(texture(texEmission, FragTexCoord)).rgb, true);
+        //emission = vec3(texture(texEmission, FragTexCoord));
         //emission = emission * sin(ubo.time) * 0.5 + 0.5) * 2.0;  
-        //emission = emission  ;  
     }
     
     // phase 1: directional lighting

@@ -8,7 +8,6 @@
 
 #include "enum.h"
 #include "Entity.h"
-
 class Camera : public Entity
 {
 public:
@@ -23,7 +22,6 @@ public:
 	glm::vec3 getFront();
 
 	void setFreeMovement(bool state);
-
 	virtual void move(float speed, const int direction, float dt) override;
 	virtual glm::vec3 moveForward(glm::vec3 position, float speed, float dt, Entity* linkedEntity) override;
 	virtual glm::vec3 moveBackward(glm::vec3 position, float speed, float dt, Entity* linkedEntity) override;

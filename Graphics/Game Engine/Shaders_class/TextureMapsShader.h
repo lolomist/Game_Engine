@@ -8,12 +8,12 @@
 class TextureMapsShader : public Shader
 {
 public:
-	TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, bool isSpecular);
-	TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, bool isSpecular, bool isEffuse);
+	TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples, bool isSpecular);
+	TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples, bool isSpecular, bool isEffuse);
 	virtual VkDescriptorSetLayout getDescriptorSetLayout() override;
 	virtual VkPipelineLayout getPipelineLayout() override;
 	virtual VkPipeline getGraphicsPipeline() override;
-	virtual void createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass) override;
+	virtual void createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples) override;
 	virtual void createDescriptorSetLayout() override;
 	void createDescriptorSetLayoutObject();
 
@@ -33,7 +33,7 @@ private:
 	VkPipelineLayout _pipelineLayout;
 	VkRenderPass _renderPass;
 	VkPipeline _graphicsPipeline;
-
+	VkSampleCountFlagBits _msaaSamples;
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 	std::vector<char> readFile(const std::string& filename);
 };

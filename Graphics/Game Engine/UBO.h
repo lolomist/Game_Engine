@@ -43,6 +43,8 @@ struct Material {
 	alignas(16) glm::vec3 diffuse;
 	alignas(16) glm::vec3 specular;
 	alignas(4) float shininess;
+	alignas(16) glm::vec3 emissionColor;
+	alignas(4) float emissionRate;
 };
 
 struct UniformBufferObject {

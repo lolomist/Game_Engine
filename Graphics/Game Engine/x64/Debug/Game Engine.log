@@ -1,10 +1,21 @@
-﻿  main.cpp
-C:\Users\brice\source\repos\Game Engine\Game Engine\main.cpp(3,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-C:\Users\brice\source\repos\Game Engine\Game Engine\Engine.h(798,31): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\brice\source\repos\Game Engine\Game Engine\main.cpp(4,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-C:\Users\brice\source\repos\Game Engine\Game Engine\main.cpp(42,198): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\brice\source\repos\Game Engine\Game Engine\main.cpp(43,188): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\brice\source\repos\Game Engine\Game Engine\main.cpp(44,197): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\brice\source\repos\Game Engine\Game Engine\main.cpp(45,198): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\brice\source\repos\Game Engine\Game Engine\main.cpp(46,198): warning C4305: 'argument': truncation from 'double' to 'float'
-  Game Engine.vcxproj -> C:\Users\brice\source\repos\Game Engine\x64\Debug\Game Engine.exe
+﻿  game.cpp
+C:\Users\brice\Documents\Game_Engine\Graphics\Game Engine\game.cpp(3,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\brice\Documents\Game_Engine\Graphics\Game Engine\game.cpp(4,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\brice\Documents\Game_Engine\Graphics\Game Engine\game.cpp(5,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\brice\Documents\Game_Engine\Graphics\Game Engine\game.cpp(43,24): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\brice\Documents\Game_Engine\Graphics\Game Engine\game.cpp(44,31): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\brice\Documents\Game_Engine\Graphics\Game Engine\game.cpp(45,32): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\brice\Documents\Game_Engine\Graphics\Game Engine\game.cpp(46,32): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+  Game Engine.vcxproj -> C:\Users\brice\Documents\Game_Engine\Graphics\x64\Debug\Game Engine.exe

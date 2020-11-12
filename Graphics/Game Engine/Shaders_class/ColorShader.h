@@ -9,12 +9,12 @@
 class ColorShader : public Shader
 {
 public:
-	ColorShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass);
+	ColorShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples);
 	VkDescriptorSetLayout getDescriptorSetLayout();
 	VkPipelineLayout getPipelineLayout();
 	VkPipeline getGraphicsPipeline();
 
-	void createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass);
+	virtual void createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples);
 	void destroyPipeline();
 	void destroyDescriptorSetLayout();
 

@@ -10,7 +10,7 @@
 
 #include <glm/glm.hpp>
 
-static void loadOBJ(const char* file_name, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, glm::vec3 color)
+static std::vector<glm::vec3> loadOBJ(const char* file_name, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, std::vector<glm::vec3> &verticesPos, glm::vec3 color)
 {
 	//vertex portions
 	std::vector<glm::fvec3> vertex_positions;
@@ -149,11 +149,14 @@ static void loadOBJ(const char* file_name, std::vector<Vertex>& vertices, std::v
 		vertex.color = color;
 		vertex.normal = vertex_normals[vertex_normal_indicies[i] - 1];
 
-		/*std::cout << "vertex[" << i << "] X : " <<  vertex.pos.x <<std::endl;
-		std::cout << "vertex[" << i << "] Y : " << vertex.pos.y << std::endl;
-		std::cout << "vertex[" << i << "] Z : " << vertex.pos.z << std::endl;*/
+		//std::cout << "vertex[" << i << "] X : " <<  vertex.pos.x <<std::endl;
+		//std::cout << "vertex[" << i << "] Y : " << vertex.pos.y << std::endl;
+		//std::cout << "vertex[" << i << "] Z : " << vertex.pos.z << std::endl;
 
 		vertices.push_back(vertex);
+		verticesPos.push_back(vertex.pos);
 		indices.push_back((uint32_t)indices.size());
 	}
+
+	return verticesPos;
 }

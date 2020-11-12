@@ -49,6 +49,14 @@ public:
 	virtual void destroyIndexBuffer() override;
 	virtual void destroyUniformBuffers(size_t swapChainImageSize) override;
 	virtual int hasSpecularTexture() override;
+	virtual glm::vec3 getEmissionColor() override;
+	virtual float getEmissionRate() override;
+	virtual void setEmissionRate(float emissionRate) override;
+	virtual void setEmissionColor(glm::vec3 emissionColor) override;
+	virtual std::vector<Vertex> getVertices() override;
+	virtual std::vector<glm::vec3> getVerticesPos() override;
+	virtual void printVertices() override;
+	virtual float* getVerticesFloat() override;
 
 private:
 	Utils* _utils;
@@ -63,11 +71,16 @@ private:
 	glm::vec3 _scale;
 	glm::vec3 _color;
 
+	glm::vec3 _emissionColor = glm::vec3(0.f, 0.f, 0.f);
+	float _emissionRate = 1.0;
+
 	//Texture data for obj
 	std::vector<TextureImage*> _textureImages;
 
 	//Vertex data for obj
 	std::vector<Vertex> _vertices;
+	std::vector<glm::vec3> _verticesPos;
+	float* _verticesFloat;
 	VkBuffer _vertexBuffer;
 	VkDeviceMemory _vertexBufferMemory;
 
@@ -91,5 +104,6 @@ private:
 	void createDescriptorSetTexture(size_t imageIndex);
 	void createDescriptorSetSpecularTexture(size_t imageIndex);
 	void createDescriptorSetSpecularEmissionTexture(size_t imageIndex);
+	void updateVertex();
+	void printVerticesFloat();
 };
-

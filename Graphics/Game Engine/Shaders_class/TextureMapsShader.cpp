@@ -1,7 +1,7 @@
 #include "TextureMapsShader.h"
 #include <iostream>
 
-TextureMapsShader::TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, bool isSpecular)
+TextureMapsShader::TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples, bool isSpecular)
 {
   /*  if (isSpecular == true) {
         _vertShaderPath = "shaders/textureSpecularShaderVert.spv";
@@ -17,12 +17,13 @@ TextureMapsShader::TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device
     _swapChainExtent = swapChainExtent;
     _device = device;
     _renderPass = renderPass;
+    _msaaSamples = msaaSamples;
 
     createDescriptorSetLayout();
-    createGraphicsPipeline(_swapChainExtent, _device, _renderPass);
+    createGraphicsPipeline(_swapChainExtent, _device, _renderPass, _msaaSamples);
 }
 
-TextureMapsShader::TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, bool isSpecular, bool isEffuse)
+TextureMapsShader::TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples, bool isSpecular, bool isEffuse)
 {
     if (isSpecular == true && isEffuse == true) {
         _isEffuseAndSpecular = true;
@@ -36,9 +37,9 @@ TextureMapsShader::TextureMapsShader(VkExtent2D swapChainExtent, VkDevice device
     _swapChainExtent = swapChainExtent;
     _device = device;
     _renderPass = renderPass;
-
+    _msaaSamples = msaaSamples;
     createDescriptorSetLayout();
-    createGraphicsPipeline(_swapChainExtent, _device, _renderPass);
+    createGraphicsPipeline(_swapChainExtent, _device, _renderPass, _msaaSamples);
 }
 
 VkDescriptorSetLayout TextureMapsShader::getDescriptorSetLayout()
@@ -61,7 +62,7 @@ VkPipeline TextureMapsShader::getGraphicsPipeline()
     return _graphicsPipeline;
 }
 
-void TextureMapsShader::createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass)
+void TextureMapsShader::createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples)
 {
     auto vertShaderCode = readFile(_vertShaderPath);
     auto fragShaderCode = readFile(_fragShaderPath);
@@ -135,7 +136,7 @@ void TextureMapsShader::createGraphicsPipeline(VkExtent2D swapChainExtent, VkDev
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_FALSE;
-    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    multisampling.rasterizationSamples = msaaSamples;
     multisampling.minSampleShading = 1.0f; // Optionnel
     multisampling.pSampleMask = nullptr; // Optionnel
     multisampling.alphaToCoverageEnable = VK_FALSE; // Optionnel

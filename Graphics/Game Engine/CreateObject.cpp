@@ -133,6 +133,7 @@ CreateObject::CreateObject(std::string modelPath, std::string texturePath, std::
     createVertexBuffer();
     createIndexBuffer();
 }
+
 //
 //CreateObject::CreateObject(std::string modelPath, glm::vec3 color, std::string specularTexturePath, std::string emissionTexturePath, Shader* shader, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Utils* utils)
 //{
@@ -225,6 +226,7 @@ void CreateObject::move(float speed, const int direction, float dt)
         _position = this->moveRight(_position, speed, dt, _linkedEntity);
         break;
     }
+    updateVertex();
 }
 
 void CreateObject::rotate(const glm::vec3 rotation, float dt)
@@ -342,7 +344,9 @@ void CreateObject::destroyUniformBuffers(size_t swapChainImageSize)
 
 void CreateObject::loadModel(std::string objPath)
 {
-    loadOBJ(objPath.c_str(), _vertices, _indices, _color);
+   _verticesPos = loadOBJ(objPath.c_str(), _vertices, _indices, _verticesPos, _color);
+   updateVertex();
+   _verticesFloat = &_verticesPos[0].x;
 }
 
 void CreateObject::createVertexBuffer()
@@ -604,6 +608,69 @@ void CreateObject::createDescriptorSetSpecularEmissionTexture(size_t i)
     descriptorWrites.push_back(descriptorWriteImageSpecular);
     descriptorWrites.push_back(descriptorWriteImageEmission);
     vkUpdateDescriptorSets(_utils->getDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+}
+
+void CreateObject::updateVertex()
+{
+    static std::vector<glm::vec3> initialVertexPosition = _verticesPos;
+
+    for (size_t i = 0; i != _verticesPos.size(); i++) {
+        _verticesPos.at(i).x = initialVertexPosition.at(i).x + _position.x;
+        _verticesPos.at(i).y = initialVertexPosition.at(i).y + _position.y;
+        _verticesPos.at(i).z = initialVertexPosition.at(i).z + _position.z;
+    }
+    _verticesFloat = &_verticesPos[0].x;
+}
+
+void CreateObject::printVerticesFloat()
+{
+    for (size_t i = 0; i < _verticesPos.size() * 3; i++) {
+        std::cout << "VERTICES FLOAT [" << i << "] = " << _verticesFloat[i] << std::endl;
+    }
+}
+
+float* CreateObject::getVerticesFloat()
+{
+    return _verticesFloat;
+}
+
+std::vector<Vertex> CreateObject::getVertices()
+{
+    return _vertices;
+}
+
+std::vector<glm::vec3> CreateObject::getVerticesPos()
+{
+    return _verticesPos;
+}
+
+void CreateObject::printVertices()
+{
+    for (size_t i = 0; i != _verticesPos.size(); i++) {
+        std::cout << "VERTEX[" << i << "] X = " << _verticesPos.at(i).x << std::endl;
+        std::cout << "VERTEX[" << i << "] Y = " << _verticesPos.at(i).y << std::endl;
+        std::cout << "VERTEX[" << i << "] Z = " << _verticesPos.at(i).z << std::endl;
+    }
+}
+
+void CreateObject::setEmissionRate(float emissionRate)
+{
+    _emissionRate = emissionRate;
+}
+
+void CreateObject::setEmissionColor(glm::vec3 emissionColor)
+{
+    _emissionColor = emissionColor;
+}
+
+glm::vec3 CreateObject::getEmissionColor()
+{
+    return _emissionColor;
+}
+
+float CreateObject::getEmissionRate()
+{
+    return _emissionRate;
 }
 
 int CreateObject::hasSpecularTexture()

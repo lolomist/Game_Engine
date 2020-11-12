@@ -9,12 +9,12 @@
 class LightSourceShader : public Shader
 {
 public:
-	LightSourceShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass);
+	LightSourceShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples);
 	
 	virtual VkDescriptorSetLayout getDescriptorSetLayout() override;
 	virtual VkPipelineLayout getPipelineLayout() override;
 	virtual VkPipeline getGraphicsPipeline() override;
-	virtual void createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass) override;
+	virtual void createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples) override;
 	virtual void createDescriptorSetLayout() override;
 
 	void destroyPipeline();
@@ -30,6 +30,7 @@ private:
 	VkPipelineLayout _pipelineLayout;
 	VkRenderPass _renderPass;
 	VkPipeline _graphicsPipeline;
+	VkSampleCountFlagBits _msaaSamples;
 
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 	std::vector<char> readFile(const std::string& filename);

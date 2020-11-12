@@ -1,6 +1,6 @@
 #include "LightSourceShader.h"
 
-LightSourceShader::LightSourceShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass)
+LightSourceShader::LightSourceShader(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples)
 {
     _vertShaderPath = "shaders/lightSourceVert.spv";
     _fragShaderPath = "shaders/lightSourceFrag.spv";
@@ -9,7 +9,7 @@ LightSourceShader::LightSourceShader(VkExtent2D swapChainExtent, VkDevice device
     _renderPass = renderPass;
 
     createDescriptorSetLayout();
-    createGraphicsPipeline(_swapChainExtent, _device, _renderPass);
+    createGraphicsPipeline(swapChainExtent, device, renderPass, msaaSamples);
 }
 
 VkDescriptorSetLayout LightSourceShader::getDescriptorSetLayout()
@@ -27,7 +27,7 @@ VkPipeline LightSourceShader::getGraphicsPipeline()
     return _graphicsPipeline;
 }
 
-void LightSourceShader::createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass)
+void LightSourceShader::createGraphicsPipeline(VkExtent2D swapChainExtent, VkDevice device, VkRenderPass renderPass, VkSampleCountFlagBits msaaSamples)
 {
     auto vertShaderCode = readFile(_vertShaderPath);
     auto fragShaderCode = readFile(_fragShaderPath);
@@ -101,7 +101,7 @@ void LightSourceShader::createGraphicsPipeline(VkExtent2D swapChainExtent, VkDev
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_FALSE;
-    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    multisampling.rasterizationSamples = msaaSamples;
     multisampling.minSampleShading = 1.0f; // Optionnel
     multisampling.pSampleMask = nullptr; // Optionnel
     multisampling.alphaToCoverageEnable = VK_FALSE; // Optionnel
