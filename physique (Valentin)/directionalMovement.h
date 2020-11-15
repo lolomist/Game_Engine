@@ -1,12 +1,15 @@
 #include <iostream>
+#include <vector>
 
 #define SMALL_NUM   0.00000001
 
-float *GerDirectionnalVectorForward(float *cameravector)
-{
+std::vector<float> GerDirectionnalVectorForward(const std::vector<float> &cameravector) {
+
+    if (cameravector.size() < 3) return std::vector<float>();
+
     // We set le length of the cameravector to 1 in any cases (exept if x and y are at 0)
     float i = 1 / (sqrt(cameravector[0] * cameravector[0]) + sqrt(cameravector[2] * cameravector[2]));
-    float *fixedvector = cameravector;
+    std::vector<float> fixedvector = cameravector;
     fixedvector[0] = (cameravector[0] * i);
     fixedvector[1] = 0;
     fixedvector[2] = (cameravector[2] * i);
@@ -15,29 +18,28 @@ float *GerDirectionnalVectorForward(float *cameravector)
 }
 
 
-float *GerDirectionnalVectorRight(float *cameravector)
-{
-    float *direction = cameravector;
+std::vector<float> GerDirectionnalVectorRight(const std::vector<float> &cameravector) {
+
+    if (cameravector.size() < 3) return std::vector<float>();
+
+    std::vector<float> direction = cameravector;
     // We set le length of the cameravector to 1 in any cases (exept if x and y are at 0)
     float i = 1 / (sqrt(cameravector[0] * cameravector[0]) + sqrt(cameravector[2] * cameravector[2]));
-    float fixedvector[4] = {cameravector[0] * i, 0, cameravector[2] * i};
+    std::vector<float> = {cameravector[0] * i, 0, cameravector[2] * i};
 
     if (cameravector[0] >= 0 && cameravector[2] >= 0) {
         direction[0] = (fixedvector[0] - 1);
         direction[1] = 0;
         direction[2] = (1 - fixedvector[2]);
-    }
-    else if (cameravector[0] <= 0 && cameravector[2] >= 0) {
+    } else if (cameravector[0] <= 0 && cameravector[2] >= 0) {
         direction[0] = (-1 - fixedvector[0]);
         direction[1] = 0;
         direction[2] = (fixedvector[2] - 1);
-    }
-    else if (cameravector[0] <= 0 && cameravector[2] <= 0) {
+    } else if (cameravector[0] <= 0 && cameravector[2] <= 0) {
         direction[0] = (fixedvector[0] + 1);
         direction[1] = 0;
         direction[2] = (-1 - fixedvector[2]);
-    }
-    else if (cameravector[0] >= 0 && cameravector[2] <= 0) {
+    } else if (cameravector[0] >= 0 && cameravector[2] <= 0) {
         direction[0] = (1 - fixedvector[0]);
         direction[1] = 0;
         direction[2] = (fixedvector[2] + 1);
@@ -47,11 +49,11 @@ float *GerDirectionnalVectorRight(float *cameravector)
 }
 
 
-float *GerDirectionnalVectorBackward(float *cameravector)
-{
+std::vector<float> GerDirectionnalVectorBackward(const std::vector<float> &cameravector) {
+    if (cameravector.size() < 3) return std::vector<float>();
     // We set le length of the cameravector to 1 in any cases (exept if x and y are at 0)
     float i = 1 / (sqrt(cameravector[0] * cameravector[0]) + sqrt(cameravector[2] * cameravector[2]));
-    float *fixedvector = cameravector;
+    std::vector<float> fixedvector = cameravector;
     fixedvector[0] = -(cameravector[0] * i);
     fixedvector[1] = 0;
     fixedvector[2] = -(cameravector[2] * i);
@@ -60,29 +62,28 @@ float *GerDirectionnalVectorBackward(float *cameravector)
 }
 
 
-float *GerDirectionnalVectorLeft(float *cameravector)
-{
-    float *direction = cameravector;
+std::vector<float> GerDirectionnalVectorLeft(const std::vector<float> &cameravector) {
+    if (cameravector.size() < 3) return std::vector<float>();
+
+    std::vector<float> direction = cameravector;
     // We set le length of the cameravector to 1 in any cases (exept if x and y are at 0)
     float i = 1 / (sqrt(cameravector[0] * cameravector[0]) + sqrt(cameravector[2] * cameravector[2]));
-    float fixedvector[4] = {cameravector[0] * i, 0, cameravector[2] * i};
+
+    std::vector<float> fixedvector = {cameravector[0] * i, 0, cameravector[2] * i};
 
     if (cameravector[0] >= 0 && cameravector[2] >= 0) {
         direction[0] = (1 - fixedvector[0]);
         direction[1] = 0;
         direction[2] = (fixedvector[2] - 1);
-    }
-    else if (cameravector[0] <= 0 && cameravector[2] >= 0) {
+    } else if (cameravector[0] <= 0 && cameravector[2] >= 0) {
         direction[0] = (fixedvector[0] + 1);
         direction[1] = 0;
         direction[2] = (1 - fixedvector[2]);
-    }
-    else if (cameravector[0] <= 0 && cameravector[2] <= 0) {
+    } else if (cameravector[0] <= 0 && cameravector[2] <= 0) {
         direction[0] = (-1 - fixedvector[0]);
         direction[1] = 0;
         direction[2] = (fixedvector[2] + 1);
-    }
-    else if (cameravector[0] >= 0 && cameravector[2] <= 0) {
+    } else if (cameravector[0] >= 0 && cameravector[2] <= 0) {
         direction[0] = (fixedvector[0] - 1);
         direction[1] = 0;
         direction[2] = (-1 - fixedvector[2]);
@@ -90,7 +91,6 @@ float *GerDirectionnalVectorLeft(float *cameravector)
 
     return (direction);
 }
-
 
 
 // Calculate the directionnal vector according to where the camera looks at
@@ -101,22 +101,30 @@ float *GerDirectionnalVectorLeft(float *cameravector)
 //          3 for backward
 //          4 for left
 // Errors: return NULL
-float *GetDirectionnalMovementVector(float *cameravector, int direction) {
+std::vector<float> GetDirectionnalMovementVector(const std::vector<float> &cameravector, int direction) {
     // Checks if the carema direction vector given is correct
     /*if ((sizeof(cameravector) + 1) != 3) {
         std::cerr << "GetDirectionnalMovementVector(): the given camera direction vector is invalid" << std::endl;
         std::cout << sizeof(cameravector) << std::endl;
         return (NULL);
     }*/
+
+    if (cameravector.empty()) {
+        return cameravector;
+    }
+
     if (cameravector[0] == 0 && cameravector[2] == 0) {
-        std::cerr << "GetDirectionnalMovementVector(): in the given directional vector of the camera, x et y values equals 0" << std::endl;
-        return (NULL);
+        std::cerr
+                << "GetDirectionnalMovementVector(): in the given directional vector of the camera, x et y values equals 0"
+                << std::endl;
+        return (std::vector<float>());
     }
     if (direction < 1 || direction > 4) {
-        std::cerr << "GetDirectionnalMovementVector(): the direction asked is invalid, it is " << direction << " instead of 1/2/3 or 4" << std::endl;
-        return (NULL);
+        std::cerr << "GetDirectionnalMovementVector(): the direction asked is invalid, it is " << direction
+                  << " instead of 1/2/3 or 4" << std::endl;
+        return (std::vector<float>());
     }
-    
+
     if (direction == 1)
         return (GerDirectionnalVectorForward(cameravector));
     else if (direction == 2)

@@ -1,8 +1,9 @@
-#include "../include/physics.hpp"
+#include "physics.hpp"
+#include <vector>
 
 int main() {
-    float face1[108];
-    face1[0] = 1; 
+    std::vector<float> face1(108, 0.0);
+    face1[0] = 1;
     face1[1] = 1; 
     face1[2] = -1.16842; 
     face1[3] = -1; 
@@ -113,7 +114,7 @@ int main() {
 
 
 
-    float face2[108];
+    std::vector<float> face2(108, 0.0);
     face2[0] = 6;
     face2[1] = 1;
     face2[2] = 9;
@@ -226,10 +227,11 @@ int main() {
 
     std::cout << "Début du test" << std::endl;
     bool test = CheckCollision(face1, face2);
-    if (test == true)
+    if (test) {
         std::cout << "Ils sont en collision" << std::endl;
-    if (test == false)
+    } else {
         std::cout << "Ils ne sont pas en collision" << std::endl;
+    }
 
     /*float camera[4] = {1, 0, 1};
 

@@ -5,6 +5,8 @@
 #include <math.h>
 #include <algorithm>
 
-bool CheckCollision(float *object1, float *object2);
-int dot(float *vect_A, float *vect_B);
-float *GetDirectionnalMovementVector(float *cameravector, int direction);
+bool CheckCollision(const std::vector<float> &object1, const std::vector<float> &object2);
+
+float dot(const std::vector<float> &vect_A, const std::vector<float> &vect_B);
+
+std::vector<float> GetDirectionnalMovementVector(const std::vector<float> &cameravector, int direction);
