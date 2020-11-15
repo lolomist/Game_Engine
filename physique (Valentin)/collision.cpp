@@ -34,6 +34,12 @@ float *cross(float *b, float *c)
 
 bool CheckCollision_RayTriangle(float *P0, float *P1, float *P2, float *V0, float *V1, float *V2)
 {
+    //std::cout << "P0: " << P0[0] << " / "<< P0[1] << " / "<< P0[2] << std::endl;
+    //std::cout << "P1: " << P1[0] << " / "<< P1[1] << " / "<< P1[2] << std::endl;
+    //std::cout << "P2: " << P2[0] << " / "<< P2[1] << " / "<< P2[2] << std::endl;
+    //std::cout << "V0: " << V0[0] << " / "<< V0[1] << " / "<< V0[2] << std::endl;
+    //std::cout << "V1: " << V1[0] << " / "<< V1[1] << " / "<< V1[2] << std::endl;
+    //std::cout << "V2: " << V2[0] << " / "<< V2[1] << " / "<< V2[2] << std::endl;
     // triangle vectors
     float *u = (float*)malloc(sizeof(float) * 3);
     float *v = (float*)malloc(sizeof(float) * 3);
@@ -43,6 +49,7 @@ bool CheckCollision_RayTriangle(float *P0, float *P1, float *P2, float *V0, floa
     float w0[3];
     float w[3];
     float w1[3];
+    float w2[3];
     // params to calc ray-plane intersect       
     float r, a, b;              
 
@@ -50,42 +57,55 @@ bool CheckCollision_RayTriangle(float *P0, float *P1, float *P2, float *V0, floa
     u[0] = V1[0] - V0[0];
     u[1] = V1[1] - V0[1];
     u[2] = V1[2] - V0[2];
+    //std::cout << "u: " << u[0] << " / "<< u[1] << " / "<< u[2] << "  -> OK" << std::endl;
 
     v[0] = V2[0] - V0[0];
     v[1] = V2[1] - V0[1];
     v[2] = V2[2] - V0[2];
+    //std::cout << "v: " << v[0] << " / "<< v[1] << " / "<< v[2] << "  -> OK" << std::endl;
 
     n = cross(u, v);
+    //std::cout << "n: " << n[0] << " / "<< n[1] << " / "<< n[2] << "  -> OK" << std::endl;
 
     // ray direction vector
     dir[0] = P1[0] - P0[0];
     dir[1] = P1[1] - P0[1];
     dir[2] = P1[2] - P0[2];
+    //std::cout << "dir: " << dir[0] << " / "<< dir[1] << " / "<< dir[2] << "  -> OK" << std::endl;
 
 
     w0[0] = P0[0] - V0[0];
     w0[1] = P0[1] - V0[1];
     w0[2] = P0[2] - V0[2];
+    //std::cout << "w0: " << w0[0] << " / "<< w0[1] << " / "<< w0[2] << "  -> OK" << std::endl;
 
 
     a = -dot(n, w0);
     b = dot(n, dir);
+    //std::cout << "a: " << a << "  -> OK" << std::endl;
+    //std::cout << "b: " << b << "  -> OK" << std::endl;
 
-    std::cout << "Check parallel/coplanar" << std::endl;
+    //std::cout << "Check parallel/coplanar" << std::endl;
     // Check if the segment of the first object is parallel to the second object's face
     // If they are parallel AND coplanar (in the same plane), then checks if they intersect each others
     if (fabs(b) < SMALL_NUM) {
         if (fabs(a) < SMALL_NUM) {
 
-            //std::cout << "V0: " << V0[0] << " / "<< V0[1] << " / "<< V0[2] << std::endl;
-            //std::cout << "P0: " << P0[0] << " / "<< P0[1] << " / "<< P0[2] << std::endl;
             w1[0] = V0[0] - P0[0];
             w1[1] = V0[1] - P0[1];
             w1[2] = V0[2] - P0[2];
 
-            double s = dot(cross(w1, u), cross(dir, u)) / norm(cross(dir, u));
-            if (s >= 0.0 && s <= 1.0)
-                return (true);
+            w2[0] = P1[0] - V0[0];
+            w2[1] = P1[1] - V0[1];
+            w2[2] = P1[2] - V0[2];
+
+            //std::cout << "w1: " << w1[0] << " / "<< w1[1] << " / "<< w1[2] << "  -> OK" << std::endl;
+            double s = dot(cross(u, w0), cross(dir, w2));
+            //std::cout << "cross(w1, u): " << cross(w1, u)[0] << " / "<< cross(w1, u)[1] << " / "<< cross(w1, u)[2] << "  -> OK" << std::endl;
+            //std::cout << "cross(dir, u): " << cross(dir, u)[0] << " / "<< cross(dir, u)[1] << " / "<< cross(dir, u)[2] << "  -> OK" << std::endl;
+            //std::cout << "norm(cross(dir, u)): " << norm(cross(dir, u)) << std::endl;
+            //std::cout << "s: " << s << std::endl;
+            return (s >= 0.0 && s <= 1.0);
         }
     }
 
@@ -121,7 +141,9 @@ bool CheckCollision(float *object1, float *object2)
     std::cout << "Fin gestion d'erreur" << std::endl;
 
 
-
+    
+    std::cout << "Taille du premier tableau: " << sizeof(object1)/sizeof(object1[0]) << std::endl;
+    std::cout << "Taille du deuxieme tableau: " << sizeof(object2)/sizeof(object2[0]) << std::endl;
     for (int i = 0; i < (sizeof(object1) + 1); i = i + 9) {
         for (int x = 0; x < (sizeof(object2) + 1); x = x + 9) {
             float P0[3] = {object1[x], object1[x + 1], object1[x + 2]};
