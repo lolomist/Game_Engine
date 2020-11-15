@@ -8,7 +8,7 @@ float dot(float *vect_A, float *vect_B)
 { 
   
     float product = 0; 
-  
+
     // Loop for calculate dot product 
     for (int i = 0; i < 3; i++)
         product = product + vect_A[i] * vect_B[i];
@@ -26,11 +26,77 @@ float *cross(float *b, float *c)
     float *result = (float*)malloc(sizeof(float) * 3);
     result[0] = b[1] * c[2] - c[1] * b[2];
     result[1] = b[2] * c[0] - c[2] * b[0];
-    result[2] = b[0] *  c[1] - c[0] * b[1];
+    result[2] = b[0] * c[1] - c[0] * b[1];
 
 	return (result);
 }
 
+
+bool CheckCollision_RayTriangle(float *P0, float *P1, float *P2, float *V0, float *V1, float *V2)
+{
+    // triangle vectors
+    float *u = (float*)malloc(sizeof(float) * 3);
+    float *v = (float*)malloc(sizeof(float) * 3);
+    float *n = (float*)malloc(sizeof(float) * 3);
+    // ray vectors      
+    float dir[3];
+    float w0[3];
+    float w[3];
+    float w1[3];
+    // params to calc ray-plane intersect       
+    float r, a, b;              
+
+    // get triangle edge vectors and plane normal
+    u[0] = V1[0] - V0[0];
+    u[1] = V1[1] - V0[1];
+    u[2] = V1[2] - V0[2];
+
+    v[0] = V2[0] - V0[0];
+    v[1] = V2[1] - V0[1];
+    v[2] = V2[2] - V0[2];
+
+    n = cross(u, v);
+
+    // ray direction vector
+    dir[0] = P1[0] - P0[0];
+    dir[1] = P1[1] - P0[1];
+    dir[2] = P1[2] - P0[2];
+
+
+    w0[0] = P0[0] - V0[0];
+    w0[1] = P0[1] - V0[1];
+    w0[2] = P0[2] - V0[2];
+
+
+    a = -dot(n, w0);
+    b = dot(n, dir);
+
+    std::cout << "Check parallel/coplanar" << std::endl;
+    // Check if the segment of the first object is parallel to the second object's face
+    // If they are parallel AND coplanar (in the same plane), then checks if they intersect each others
+    if (fabs(b) < SMALL_NUM) {
+        if (fabs(a) < SMALL_NUM) {
+
+            //std::cout << "V0: " << V0[0] << " / "<< V0[1] << " / "<< V0[2] << std::endl;
+            //std::cout << "P0: " << P0[0] << " / "<< P0[1] << " / "<< P0[2] << std::endl;
+            w1[0] = V0[0] - P0[0];
+            w1[1] = V0[1] - P0[1];
+            w1[2] = V0[2] - P0[2];
+
+            double s = dot(cross(w1, u), cross(dir, u)) / norm(cross(dir, u));
+            if (s >= 0.0 && s <= 1.0)
+                return (true);
+        }
+    }
+
+
+    // check intersect point of ray with triangle plane
+    r = a / b;
+    if (r < 0.0 || r > 1.0)
+        return (false);             // => no intersection
+    else
+        return (true);              // => intersection
+}
 
 
 // Checks if an object collides with another object
@@ -57,64 +123,22 @@ bool CheckCollision(float *object1, float *object2)
 
 
     for (int i = 0; i < (sizeof(object1) + 1); i = i + 9) {
-        // Calculation of the vectors of all segments of the face of the triangle of the first object
-        float v1[3] = {(object1[i + 3] - object1[i]), (object1[i + 4] - object1[i + 1]), (object1[i + 5] - object1[i + 2])};
-        float v2[3] = {(object1[i + 6] - object1[i + 3]), (object1[i + 7] - object1[i + 4]), (object1[i + 8] - object1[i + 5])};
-        float v3[3] = {(object1[i] - object1[i + 6]), (object1[i + 1] - object1[i + 7]), (object1[i + 2] - object1[i + 8])};
         for (int x = 0; x < (sizeof(object2) + 1); x = x + 9) {
-            // Calculation of the vectors of all segments of the face of the triangle of the second object
-            float p1[3] = {(object2[i + 3] - object2[i]), (object2[i + 4] - object2[i + 1]), (object2[i + 5] - object2[i + 2])};
-            float p2[3] = {(object2[i + 6] - object2[i + 3]), (object2[i + 7] - object2[i + 4]), (object2[i + 8] - object2[i + 5])};
-            float p3[3] = {(object2[i] - object2[i + 6]), (object2[i + 1] - object2[i + 7]), (object2[i + 2] - object2[i + 8])};
+            float P0[3] = {object1[x], object1[x + 1], object1[x + 2]};
+            float P1[3] = {object1[x + 3], object1[x + 4], object1[x + 5]};
+            float P2[3] = {object1[x + 6], object1[x + 7], object1[x + 8]};
+            float V0[3] = {object2[x], object2[x + 1], object2[x + 2]};
+            float V1[3] = {object2[x + 3], object2[x + 4], object2[x + 5]};
+            float V2[3] = {object2[x + 6], object2[x + 7], object2[x + 8]};
 
-            // Calculation of the normal vector of the face of the triangle of the second object
-            float normalvector[3];
-            normalvector[0] = (((object2[x + 4] - object2[x + 1]) * (object2[x + 8] - object2[x + 2])) - ((object2[x + 5] - object2[x + 2]) * (object2[x + 7] - object2[x + 1])));
-            normalvector[1] = (((object2[x + 5] - object2[x + 2]) * (object2[x + 6] - object2[x])) - ((object2[x + 3] - object2[x]) * (object2[x + 8] - object2[x + 2])));
-            normalvector[2] = (((object2[x + 3] - object2[x]) * (object2[x + 7] - object2[x + 1])) - ((object2[x + 4] - object2[x + 1]) * (object2[x + 6] - object2[x])));
-
-            
-            float D1 = dot(normalvector, v1);
-            float D2 = dot(normalvector, v2);
-            float D3 = dot(normalvector, v3);
-            float w1[3] = {(object1[i] - object2[x]), (object1[i + 1] - object2[x + 1]), (object1[i + 2] - object2[x + 2])};
-            float w2[3] = {(object1[i + 3] - object2[x]), (object1[i + 4] - object2[x + 1]), (object1[i + 5] - object2[x + 2])};
-            float w3[3] = {(object1[i + 6] - object2[x]), (object1[i + 7] - object2[x + 1]), (object1[i + 8] - object2[x + 2])};
-            float N1 = -dot(normalvector, w1);
-            float N2 = -dot(normalvector, w2);
-            float N3 = -dot(normalvector, w3);
-            float r1[3] = {(v2[0] - v1[0]), (v2[1] - v1[1]), (v2[2] - v1[2])};
-            float r2[3] = {(p2[0] - p1[0]), (p2[1] - p1[1]), (p2[2] - p1[2])};
-            float r3[3] = {(v1[0] - p1[0]), (v1[1] - p1[1]), (v1[2] - p1[2])};
-            double s = dot(cross(r3, r2), cross(r1, r2)) / norm(cross(r1, r2));
-
-            // Check if the segments of the first object face are parallel to the second object face
-            // If they are parallel AND coplanar (in the same plane), then checks if they intersect each others
-            if (fabs(D1) < SMALL_NUM) {
-                if (N1 == 0) {
-                    if (s >= 0.0 && s <= 1.0)
-                        return (true);
-                }
-            }
-            if (fabs(D2) < SMALL_NUM) {
-                if (N2 == 0) {
-                    if (s >= 0.0 && s <= 1.0)
-                        return (true);
-                }
-            }
-            if (fabs(D3) < SMALL_NUM) {
-                if (N3 == 0) {
-                    if (s >= 0.0 && s <= 1.0)
-                        return (true);
-                }
-            }
-
-            // They are not parallel, so we compute the intersection parameter
-            float sI1 = N1 / D1;
-            float sI2 = N2 / D2;
-            float sI3 = N3 / D3;
-
-            if ((sI1 >= 0  && sI1 <= 1) || (sI2 >= 0  && sI2 <= 1) || (sI3 >= 0  && sI3 <= 1))
+            std::cout << "Début de vérification 1" << std::endl;
+            if (CheckCollision_RayTriangle(P0, P1, P2, V0, V1, V2) == true)
+                return (true);
+            std::cout << "Début de vérification 2" << std::endl;
+            if (CheckCollision_RayTriangle(P1, P2, P0, V0, V1, V2) == true)
+                return (true);
+            std::cout << "Début de vérification 3" << std::endl;
+            if (CheckCollision_RayTriangle(P2, P0, P1, V0, V1, V2) == true)
                 return (true);
         }
     }
