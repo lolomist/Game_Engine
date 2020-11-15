@@ -26,6 +26,7 @@ public:
 
 	bool isKeyPressed(UINT uMsg);
 	void getMousePos(double* mouseX, double* mouseY);
+	void setMousePos(double mouseX, double mouseY);
 
 	//Release the window
 	~Win32();
@@ -37,6 +38,9 @@ private:
 	HINSTANCE _win_instance = NULL;
 
 	bool _frameBufferResized = false;
+
+	double _mouseX = 0;
+	double _mouseY = 0;
 
 	LPCWSTR _windowClassName = L"WindowClassName";
 	LPCWSTR _windowName = L"Game Engine";

@@ -1,11 +1,8 @@
 ﻿#include "Win32.h"
 #include <stdexcept>
 #include <iostream>
-
 #include <stdio.h>
 #include <inttypes.h>
-
-//static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 Win32::Win32()
 {
@@ -13,13 +10,14 @@ Win32::Win32()
 
 void Win32::getMousePos(double* mouseX, double* mouseY)
 {
-	//ShowCursor(FALSE);
-	POINT p;
-	if (GetCursorPos(&p))
-	{
-		/*std::cout << "x = " << p.x << std::endl;
-		std::cout << "y = " << p.y << std::endl;*/
-	}
+	*mouseX = _mouseX;
+	*mouseY = _mouseY;
+}
+
+void Win32::setMousePos(double mouseX, double mouseY)
+{
+	_mouseX = mouseX;
+	_mouseY = mouseY;
 }
 
 bool Win32::init()
@@ -97,6 +95,21 @@ LRESULT CALLBACK Win32::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
 		auto* const window =
 			reinterpret_cast<Win32* const>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 		window->setFrameBufferResized(true);
+		break;
+	}
+
+	case WM_MOUSEMOVE:
+	{
+		auto* const window =
+			reinterpret_cast<Win32* const>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+
+		ShowCursor(FALSE);
+
+		POINT p;
+		if (GetCursorPos(&p))
+		{
+			window->setMousePos((double)p.x, (double)p.y);
+		}
 		break;
 	}
 
