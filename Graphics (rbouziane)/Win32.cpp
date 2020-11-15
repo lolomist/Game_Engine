@@ -2,7 +2,10 @@
 #include <stdexcept>
 #include <iostream>
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+#include <stdio.h>
+#include <inttypes.h>
+
+//static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 Win32::Win32()
 {
@@ -10,6 +13,13 @@ Win32::Win32()
 
 void Win32::getMousePos(double* mouseX, double* mouseY)
 {
+	//ShowCursor(FALSE);
+	POINT p;
+	if (GetCursorPos(&p))
+	{
+		/*std::cout << "x = " << p.x << std::endl;
+		std::cout << "y = " << p.y << std::endl;*/
+	}
 }
 
 bool Win32::init()
@@ -64,7 +74,7 @@ bool Win32::init()
 }
 
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+LRESULT CALLBACK Win32::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
 	{
@@ -79,6 +89,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		// .. and then stored for later lookup
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
 		window->onCreate();
+		break;
+	}
+
+	case WM_SIZE:
+	{
+		auto* const window =
+			reinterpret_cast<Win32* const>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+		window->setFrameBufferResized(true);
 		break;
 	}
 
@@ -98,6 +116,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	}
 
 	return 0;
+}
+
+bool Win32::getFrameBufferResized()
+{
+	return _frameBufferResized;
+}
+
+void Win32::setFrameBufferResized(bool isResized)
+{
+	_frameBufferResized = isResized;
 }
 
 void Win32::broadcast()
